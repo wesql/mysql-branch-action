@@ -72,16 +72,15 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Create MySQL Branch
-        uses: wesql/mysql-branch-creation-action@v1
+        uses: wesql/mysql-branch-creation-action@v0.0.3
         with:
           source_host: 'your-source-host.com'
           source_port: '3306' # Optional
           source_user: 'root' # Optional
+          source_password: ${{ secrets.SOURCE_PASSWORD }}
           include_databases: '*' # Optional
           exclude_databases: 'information_schema,mysql,performance_schema,sys' # Optional
           wescale_image: 'apecloud/apecloud-mysql-scale:0.3.8' # Optional
-        secrets:
-          source_password: ${{ secrets.source_password }}
 ```
 
 ### Explanation

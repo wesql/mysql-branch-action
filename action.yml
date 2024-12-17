@@ -17,6 +17,9 @@ inputs:
     description: 'Source user'
     required: false
     default: 'root'
+  source_password:
+    description: 'Source password for MySQL (use secrets.SOURCE_PASSWORD)'
+    required: true
   include_databases:
     description: 'Databases to include'
     required: false
@@ -29,10 +32,6 @@ inputs:
     description: 'WeScale image tag'
     required: false
     default: 'apecloud/apecloud-mysql-scale:0.3.8'
-
-secrets:
-  source_password:
-    description: 'Source password for MySQL (use secrets.SOURCE_PASSWORD)'
 
 runs:
   using: 'composite'
@@ -86,7 +85,7 @@ runs:
         SOURCE_USER: ${{ inputs.source_user }}
         INCLUDE_DATABASES: ${{ inputs.include_databases }}
         EXCLUDE_DATABASES: ${{ inputs.exclude_databases }}
-        SOURCE_PASSWORD: ${{ secrets.source_password }}
+        SOURCE_PASSWORD: ${{ inputs.source_password }}
       run: |
         mysql -h127.0.0.1 -P15306 -u root -ppasswd -e "Branch create with (
           'source_host'='${SOURCE_HOST}',
@@ -98,9 +97,3 @@ runs:
         );"
         
         mysql -h127.0.0.1 -P15306 -u root -ppasswd -e "Branch show;"
-        
-        echo "------------------------------------------"
-        echo "Branch created successfully"
-        echo "You can now connect to the branch using the following command:"
-        echo "mysql -h127.0.0.1 -P15306 -u root -ppasswd"
-        echo "------------------------------------------"
