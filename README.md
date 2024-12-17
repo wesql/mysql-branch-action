@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Create MySQL Branch
-        uses: wesql/mysql-branch-action@v0.0.5
+        uses: wesql/mysql-branch-action@v0.0.6
         with:
           source_host: 'your-source-host.com'
           source_port: '3306' # Optional
@@ -49,24 +49,24 @@ jobs:
 
       - name: Do Your Schema Migration
         run: |
-          mysql -h127.0.0.1 -P3306 -u root -pYOUR_PASSWORD -e "CREATE DATABASE IF NOT EXISTS foobar;"
-          mysql -h127.0.0.1 -P3306 -u root -pYOUR_PASSWORD -e "CREATE TABLE IF NOT EXISTS foobar.account (id INT PRIMARY KEY, name VARCHAR(255));"
+          mysql -h127.0.0.1 -P15306 -e "create database if not exists foobar"
+          mysql -h127.0.0.1 -P15306 -e "create table if not exists foobar.account (id int primary key, name varchar(255))"
 
       - name: Branch Diff
         run: |
-          mysql -h127.0.0.1 -P3306 -u root -pYOUR_PASSWORD -e "Branch diff"
+          mysql -h127.0.0.1 -P15306 -e "Branch diff"
 
       - name: Branch Prepare Merge Back
         run: |
-          mysql -h127.0.0.1 -P3306 -u root -pYOUR_PASSWORD -e "Branch prepare_merge_back"
+          mysql -h127.0.0.1 -P15306 -e "Branch prepare_merge_back"
 
       - name: Branch Merge Back
         run: |
-          mysql -h127.0.0.1 -P3306 -u root -pYOUR_PASSWORD -e "Branch merge_back"
+          mysql -h127.0.0.1 -P15306 -e "Branch merge_back"
 
       - name: Branch Show
         run: |
-          mysql -h127.0.0.1 -P3306 -u root -pYOUR_PASSWORD -e "Branch show"
+          mysql -h127.0.0.1 -P15306 -e "Branch show"
 ```
 
 ### Explanation
