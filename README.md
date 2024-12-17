@@ -89,7 +89,7 @@ jobs:
 | `source_password`   | Password for the source MySQL server.                          | Yes      | N/A                                           |
 | `include_databases` | Comma-separated list of databases to include in the branch.    | No       | `*`                                           |
 | `exclude_databases` | Comma-separated list of databases to exclude from the branch.  | No       | `information_schema,mysql,performance_schema,sys` |
-| `wescale_image`     | Docker image tag for WeScale.                                  | No       | `apecloud/apecloud-mysql-scale:0.3.8-alpha5`  |
+| `wescale_image`     | Docker image tag for WeScale.                                  | No       | `apecloud/apecloud-mysql-scale:0.3.8`  |
 
 ## Secrets
 
