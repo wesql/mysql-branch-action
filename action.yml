@@ -1,5 +1,5 @@
-name: 'MySQL Branch Creation Action'
-description: 'Creates a MySQL branch using WeScale'
+name: 'MySQL Branch Action'
+description: 'Creates a MySQL branch from a source MySQL'
 author: 'earayu'
 branding:
   icon: 'database'
@@ -32,7 +32,7 @@ inputs:
 
 secrets:
   source_password:
-    description: 'Source password for MySQL (use secrets.YOUR_SECRET_NAME)'
+    description: 'Source password for MySQL (use secrets.SOURCE_PASSWORD)'
 
 runs:
   using: 'composite'
@@ -64,7 +64,7 @@ runs:
           "${{ inputs.wescale_image }}" \
           /vt/examples/wesql-server/init_single_node_cluster.sh
 
-    - name: Wait for MySQL port
+    - name: Wait for Target Cluster to be ready
       shell: bash
       run: |
         for i in {1..60}; do
@@ -98,3 +98,9 @@ runs:
         );"
         
         mysql -h127.0.0.1 -P15306 -u root -ppasswd -e "Branch show;"
+        
+        echo "------------------------------------------"
+        echo "Branch created successfully"
+        echo "You can now connect to the branch using the following command:"
+        echo "mysql -h127.0.0.1 -P15306 -u root -ppasswd"
+        echo "------------------------------------------"
