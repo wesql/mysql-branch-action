@@ -1,0 +1,100 @@
+name: 'MySQL Branch Creation Action'
+description: 'Creates a MySQL branch using WeScale'
+author: 'earayu'
+branding:
+  icon: 'database'
+  color: 'green'
+
+inputs:
+  source_host:
+    description: 'Source host address'
+    required: true
+  source_port:
+    description: 'Source port'
+    required: false
+    default: '3306'
+  source_user:
+    description: 'Source user'
+    required: false
+    default: 'root'
+  include_databases:
+    description: 'Databases to include'
+    required: false
+    default: '*'
+  exclude_databases:
+    description: 'Databases to exclude'
+    required: false
+    default: 'information_schema,mysql,performance_schema,sys'
+  wescale_image:
+    description: 'WeScale image tag'
+    required: false
+    default: 'apecloud/apecloud-mysql-scale:0.3.8'
+
+secrets:
+  source_password:
+    description: 'Source password for MySQL (use secrets.YOUR_SECRET_NAME)'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set Up Target Cluster
+      shell: bash
+      run: |
+        docker run -itd --network host --name mysql-server \
+          -p 3306:3306 \
+          -e MYSQL_ROOT_PASSWORD=passwd \
+          -e MYSQL_ROOT_HOST=% \
+          -e MYSQL_LOG_CONSOLE=true \
+          mysql/mysql-server:8.0.32 \
+          --bind-address=0.0.0.0 \
+          --port=3306 \
+          --log-bin=binlog \
+          --gtid_mode=ON \
+          --enforce_gtid_consistency=ON \
+          --log_replica_updates=ON \
+          --binlog_format=ROW
+
+        docker run -itd --network host --name wescale \
+          -p 15306:15306 \
+          -w /vt/examples/wesql-server \
+          -e MYSQL_ROOT_USER=root \
+          -e MYSQL_ROOT_PASSWORD=passwd \
+          -e MYSQL_PORT=3306 \
+          -e MYSQL_HOST=127.0.0.1 \
+          "${{ inputs.wescale_image }}" \
+          /vt/examples/wesql-server/init_single_node_cluster.sh
+
+    - name: Wait for MySQL port
+      shell: bash
+      run: |
+        for i in {1..60}; do
+          if nc -z localhost 15306; then
+            echo "MySQL port 15306 is ready!"
+            exit 0
+          fi
+          echo "Waiting for MySQL port 15306..."
+          sleep 5
+        done
+        echo "Timeout waiting for MySQL port 15306"
+        exit 1
+
+    - name: Create Branch On Target Cluster
+      shell: bash
+      env:
+        SOURCE_HOST: ${{ inputs.source_host }}
+        SOURCE_PORT: ${{ inputs.source_port }}
+        SOURCE_USER: ${{ inputs.source_user }}
+        INCLUDE_DATABASES: ${{ inputs.include_databases }}
+        EXCLUDE_DATABASES: ${{ inputs.exclude_databases }}
+        SOURCE_PASSWORD: ${{ secrets.source_password }}
+      run: |
+        mysql -h127.0.0.1 -P15306 -u root -ppasswd -e "Branch create with (
+          'source_host'='${SOURCE_HOST}',
+          'source_port'='${SOURCE_PORT}',
+          'source_user'='${SOURCE_USER}',
+          'source_password'='${SOURCE_PASSWORD}',
+          'include_databases'='${INCLUDE_DATABASES}',
+          'exclude_databases'='${EXCLUDE_DATABASES}'
+        );"
+        
+        mysql -h127.0.0.1 -P15306 -u root -ppasswd -e "Branch show;"
