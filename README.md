@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Create MySQL Branch
-        uses: wesql/mysql-branch-action@v0.0.4
+        uses: wesql/mysql-branch-action@v0.0.5
         with:
           source_host: 'your-source-host.com'
           source_port: '3306' # Optional
