@@ -1,77 +1,27 @@
-# MySQL Branch Creation Action
+# MySQL Branch Action
 
 ![Database Icon](https://img.icons8.com/ios-filled/50/000000/database.png)
 
-**Automate MySQL Branch Creation in Your CI/CD Pipelines**
+**Automate MySQL Branch in Your CI/CD Pipelines**
 
 ## Table of Contents
 
 - [Introduction](#introduction)
+- [Example Workflow](#example-workflow)
 - [Features](#features)
-- [Prerequisites](#prerequisites)
 - [Inputs](#inputs)
 - [Secrets](#secrets)
 - [Usage](#usage)
-- [Example Workflow](#example-workflow)
 - [Further Reading](#further-reading)
 - [License](#license)
 
 ## Introduction
 
-The **MySQL Branch Action** is a GitHub Action designed to streamline the creation and management of MySQL database branches within your CI/CD pipelines. By leveraging [WeScale](https://github.com/wesql/wescale/blob/main/doc/toturial/08-Branch.md), this action facilitates efficient database operations, enabling you to create isolated branches for testing, development, and deployment without affecting your production data.
-
-## Features
-
-- **Automated Branch Creation**: Quickly create and manage MySQL database branches.
-- **Secure Credentials Management**: Utilizes GitHub Secrets to handle sensitive information securely.
-- **Customizable Configuration**: Configure various parameters to fit your project's requirements.
-- **Seamless Integration**: Easily integrates into existing GitHub Actions workflows.
-- **Scalable Infrastructure**: Leverages WeScale for efficient MySQL instance management.
-
-## Inputs
-
-| Name                | Description                                                   | Required | Default                                       |
-| ------------------- | ------------------------------------------------------------- | -------- | --------------------------------------------- |
-| `source_host`       | Hostname or IP address of the source MySQL server.            | Yes      | N/A                                           |
-| `source_port`       | Port number of the source MySQL server.                       | No       | `3306`                                        |
-| `source_user`       | Username for the source MySQL server.                          | No       | `root`                                        |
-| `source_password`   | Password for the source MySQL server.                          | Yes      | N/A                                           |
-| `include_databases` | Comma-separated list of databases to include in the branch.    | No       | `*`                                           |
-| `exclude_databases` | Comma-separated list of databases to exclude from the branch.  | No       | `information_schema,mysql,performance_schema,sys` |
-| `wescale_image`     | Docker image tag for WeScale.                                  | No       | `apecloud/apecloud-mysql-scale:0.3.8-alpha5`  |
-
-## Secrets
-
-To securely handle sensitive information, this action uses GitHub Secrets. You need to define the following secret in your repository:
-
-| Secret Name       | Description                          |
-| ----------------- | ------------------------------------ |
-| `SOURCE_PASSWORD` | Password for the source MySQL server. |
-
-### Setting Up Secrets
-
-1. **Navigate to Your Repository**:
-    - Go to your GitHub repository.
-
-2. **Access Settings**:
-    - Click on the `Settings` tab.
-
-3. **Add Secrets**:
-    - In the sidebar, click on `Secrets and variables` > `Actions`.
-    - Click the `New repository secret` button.
-
-4. **Define Secret**:
-    - **Name**: Enter `SOURCE_PASSWORD`.
-    - **Value**: Enter your source MySQL password.
-    - Click `Add secret`.
-
-## Usage
-
-Integrate this action into your GitHub Actions workflow to automate the creation of MySQL database branches. This setup ensures isolated environments for testing and development, enhancing your CI/CD pipeline's reliability and efficiency.
+The **MySQL Branch Action** is an open-source GitHub Action designed to streamline the creation and management of MySQL database branches within your CI/CD pipelines. By leveraging [WeScale](https://github.com/wesql/wescale/blob/main/doc/toturial/08-Branch.md), this action enables you to create isolated database environments for testing, development, and deployment without impacting your production data. Similar to platforms like Neon and PlanetScale, this solution offers scalable and efficient database branching to enhance your development workflow.
 
 ## Example Workflow
 
-Below is an example of how to integrate the **MySQL Branch Creation Action** into your GitHub Actions workflow. This workflow triggers on every push to the `main` branch, sets up the MySQL branch, performs schema migrations, and manages the branch lifecycle.
+Integrate this action into your GitHub Actions workflow to automate the creation of MySQL database branches. This setup ensures isolated environments for testing and development, enhancing your CI/CD pipeline's reliability and efficiency.
 
 ```yaml
 name: Branch Example
@@ -121,23 +71,54 @@ jobs:
 
 ### Explanation
 
-- **Trigger**: This workflow is triggered on every push to the `main` branch.
 - **Jobs**:
-    - **Checkout Repository**: Uses the `actions/checkout` action to clone the repository.
-    - **Create MySQL Branch**: Utilizes the `MySQL Branch Creation Action` with required inputs and secrets.
-        - **Inputs**:
-            - `source_host`: The address of your source MySQL server.
-            - `source_port`: The port of your source MySQL server (optional, default is `3306`).
-            - `source_user`: The username for your source MySQL server (optional, default is `root`).
-            - `source_password`: Your source MySQL password, securely accessed via GitHub Secrets.
-            - `include_databases`: Databases to include in the branch (optional, default is `*`).
-            - `exclude_databases`: Databases to exclude from the branch (optional, default is `information_schema,mysql,performance_schema,sys`).
-            - `wescale_image`: The WeScale Docker image tag (optional, default is `apecloud/apecloud-mysql-scale:0.3.8-alpha5`).
-    - **Do Your Schema Migration**: Executes SQL commands to create databases and tables as part of your migration process.
+    - **Create MySQL Branch**: Sets up a MySQL branch with the same schema as the source database, creating an isolated environment for testing and development.
+    - **Do Your Schema Migration**: You can perform schema migrations in the branch environment, without affecting the source database.
     - **Branch Diff**: Compares differences between the source and branch databases.
-    - **Branch Prepare Merge Back**: Prepares the branch for merging back into the source.
-    - **Branch Merge Back**: Merges the branch changes back into the source database.
+    - **Branch Prepare Merge Back**: Generates DDL statements to merge the branch changes back into the source database.
+    - **Branch Merge Back**: Actually merges the branch changes back into the source database.
     - **Branch Show**: Displays the current state of the branches.
+
+## Inputs
+
+| Name                | Description                                                   | Required | Default                                       |
+| ------------------- | ------------------------------------------------------------- | -------- | --------------------------------------------- |
+| `source_host`       | Hostname or IP address of the source MySQL server.            | Yes      | N/A                                           |
+| `source_port`       | Port number of the source MySQL server.                       | No       | `3306`                                        |
+| `source_user`       | Username for the source MySQL server.                          | No       | `root`                                        |
+| `source_password`   | Password for the source MySQL server.                          | Yes      | N/A                                           |
+| `include_databases` | Comma-separated list of databases to include in the branch.    | No       | `*`                                           |
+| `exclude_databases` | Comma-separated list of databases to exclude from the branch.  | No       | `information_schema,mysql,performance_schema,sys` |
+| `wescale_image`     | Docker image tag for WeScale.                                  | No       | `apecloud/apecloud-mysql-scale:0.3.8-alpha5`  |
+
+## Secrets
+
+To securely handle sensitive information, this action uses GitHub Secrets. You need to define the following secret in your repository:
+
+| Secret Name       | Description                          |
+| ----------------- | ------------------------------------ |
+| `SOURCE_PASSWORD` | Password for the source MySQL server. |
+
+### Setting Up Secrets
+
+1. **Navigate to Your Repository**:
+    - Go to your GitHub repository.
+
+2. **Access Settings**:
+    - Click on the `Settings` tab.
+
+3. **Add Secrets**:
+    - In the sidebar, click on `Secrets and variables` > `Actions`.
+    - Click the `New repository secret` button.
+
+4. **Define Secret**:
+    - **Name**: Enter `SOURCE_PASSWORD`.
+    - **Value**: Enter your source MySQL password.
+    - Click `Add secret`.
+
+## Usage
+
+Integrate this action into your GitHub Actions workflow to automate the creation of MySQL database branches. This setup ensures isolated environments for testing and development, enhancing your CI/CD pipeline's reliability and efficiency.
 
 ## Further Reading
 
